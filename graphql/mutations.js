@@ -4,7 +4,7 @@ const { createJWTToken } = require('../util/auth')
 
 const register = {
   type: GraphQLString,
-  description: "Register new user and return and token",
+  description: "Register new user and return a token",
   args: {
     username: {type: GraphQLString},
     password: {type: GraphQLString},
@@ -29,6 +29,30 @@ const register = {
   }
 }
 
+const login = {
+  type: GraphQLString,
+  args: {
+    email: {type: GraphQLString},
+    password: {type: GraphQLString},
+  },
+  async resolve(_, args) {
+    const {email, password} = args
+    const user = await User.findOne({email: email}).select('+password')
+    if(!user || password !== user.password) throw new Error("Invalid Credentials")
+    console.log(user)
+
+    const token = createJWTToken({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+    })
+    console.log(token)
+
+    return token
+  }
+}
+
 module.exports = {
-  register
+  register,
+  login
 };
