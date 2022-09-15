@@ -2,9 +2,12 @@ const express = require('express')
 const { graphqlHTTP } = require('express-graphql')
 const schema = require('./graphql/schema')
 const { connectDB } = require('./db')
+const morgan = require('morgan')
 
 const app = express()
 connectDB()
+
+//app.use(morgan('dev'))
 
 app.use('/graphql', graphqlHTTP({
   graphiql: true, // interfaz para realizar las consultas a la API
