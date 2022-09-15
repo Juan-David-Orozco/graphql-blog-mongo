@@ -58,13 +58,14 @@ const createPost = {
     title: {type: GraphQLString},
     body: {type: GraphQLString},
   },
-  resolve(_, args, { verifiedUser }) {
+  async resolve(_, args, { verifiedUser }) {
     console.log(verifiedUser)
     const post = new Post({
       title: args.title,
       body: args.body,
       authorId: verifiedUser._id
     })
+    await post.save()
     return post
   }
 }
