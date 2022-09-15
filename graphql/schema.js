@@ -1,12 +1,12 @@
 const { GraphQLSchema, GraphQLObjectType, GraphQLString } = require('graphql')
-const { hello } = require('./queries')
+const { users, user } = require('./queries')
 const { register, login } = require('./mutations')
 
 const QueryType = new GraphQLObjectType({
   name: "QueryType",
   description: "The root query type",
   fields: { //Se definen las funciones que puedo consultar
-    hello,
+    users, user
   }
 })
 
