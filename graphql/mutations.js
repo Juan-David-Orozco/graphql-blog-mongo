@@ -41,15 +41,12 @@ const login = {
     const {email, password} = args
     const user = await User.findOne({email: email}).select('+password')
     if(!user || password !== user.password) throw new Error("Invalid Credentials")
-    console.log(user)
-
+    //console.log(user)
     const token = createJWTToken({
       _id: user._id,
       username: user.username,
       email: user.email,
     })
-    console.log(token)
-
     return token
   }
 }
@@ -61,11 +58,12 @@ const createPost = {
     title: {type: GraphQLString},
     body: {type: GraphQLString},
   },
-  resolve(_, args) {
+  resolve(_, args, { verifiedUser }) {
+    console.log(verifiedUser)
     const post = new Post({
       title: args.title,
       body: args.body,
-      authorId: "632256fd4e4de6b3ea7cc597"
+      authorId: verifiedUser._id
     })
     return post
   }
