@@ -1,4 +1,4 @@
-const { GraphQLString } = require('graphql')
+const { GraphQLString, GraphQLID } = require('graphql')
 const { User, Post } = require('../models')
 const { createJWTToken } = require('../util/auth')
 const { PostType } = require('./types')
@@ -70,8 +70,31 @@ const createPost = {
   }
 }
 
+const updatePost = {
+  type: PostType,
+  description: "Updated a post",
+  args: {
+    id: {type: GraphQLID},
+    title: {type: GraphQLString},
+    body: {type: GraphQLString},
+  },
+  async resolve(_, {id, title, body}, { verifiedUser }) {
+    console.log(verifiedUser)
+    console.log(id, title, body)
+    if(!verifiedUser) throw new Error("Unauthorized")
+    const updatedPost = await Post.findOneAndUpdate(
+      {_id: id, authorId: verifiedUser._id}, //Condiciones de busqueda
+      {title, body}, // Elementos a modificar
+      {new: true} // Retorna nuevo registro modificado
+    )
+    console.log(updatedPost)
+    return updatedPost
+  }
+}
+
 module.exports = {
   register,
   login,
-  createPost
+  createPost,
+  updatePost
 };
