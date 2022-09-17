@@ -115,7 +115,6 @@ const deletePost = {
 
 const addComment = {
   type: CommentType,
-  //type: GraphQLString,
   description: "Add a comment to a post",
   args: {
     comment: {type: GraphQLString},
@@ -139,11 +138,58 @@ const addComment = {
   }
 }
 
+const updateComment = {
+  type: CommentType,
+  description: "Update a comment",
+  args: {
+    id: {type: GraphQLID},
+    comment: {type: GraphQLString},
+  },
+  async resolve(_, {id, comment}, { verifiedUser }) {
+    console.log(verifiedUser)
+
+    if(!verifiedUser) throw new Error("Unauthorized")
+
+    const updatedComment = await Comment.findOneAndUpdate(
+      {_id: id, userId: verifiedUser._id}, //Condiciones de busqueda
+      {comment}, // Elementos a modificar
+      {new: true} // Retorna nuevo registro modificado
+    ) 
+    console.log(updatedComment)
+    if(!updatedComment) throw new Error("Comment not found")
+
+    return updatedComment
+  }
+}
+
+const deleteComment = {
+  type: GraphQLString,
+  description: "Delete a comment",
+  args:{
+    commentId: {type: GraphQLID}
+  },
+  async resolve(_, { commentId }, { verifiedUser }) {
+
+    if(!verifiedUser) throw new Error("Unauthorized")
+
+    const deletedComment = await Comment.findOneAndDelete(
+      {_id: commentId, userId: verifiedUser._id}
+    )
+    console.log(deletedComment)
+
+    if(!deletedComment) throw new Error("Comment not found")
+
+    return "Comment deleted successfully"
+  }
+}
+
 module.exports = {
   register,
   login,
   createPost,
   updatePost,
   deletePost,
-  addComment
+  addComment,
+  updateComment,
+  deleteComment
 };
