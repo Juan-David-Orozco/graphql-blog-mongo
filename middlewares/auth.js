@@ -9,7 +9,7 @@ const authenticate = (req, res, next) => {
     // Se decodifica usando la firma establecida 
     const userDecoded = jwt.verify(token, SECRET_TOKEN)
     if(!userDecoded) return res.status(401).send('Not provided valid signature')
-    console.log(userDecoded.user)
+    console.log(userDecoded)
     req.verifiedUser = userDecoded.user
     next()
   } catch (error) {

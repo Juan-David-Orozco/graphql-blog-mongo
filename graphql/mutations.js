@@ -2,6 +2,7 @@ const { GraphQLString, GraphQLID } = require('graphql')
 const { User, Post, Comment } = require('../models')
 const { createJWTToken } = require('../util/auth')
 const { PostType, CommentType } = require('./types')
+const moment = require('moment')
 
 const register = {
   type: GraphQLString,
@@ -59,13 +60,18 @@ const createPost = {
     body: {type: GraphQLString},
   },
   async resolve(_, args, { verifiedUser }) {
-    console.log(verifiedUser)
+
     const post = new Post({
       title: args.title,
       body: args.body,
-      authorId: verifiedUser._id
+      authorId: verifiedUser._id,
+      createdAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')
     })
     await post.save()
+    
+    console.log(verifiedUser)
+    console.log(post)
+
     return post
   }
 }
@@ -79,15 +85,21 @@ const updatePost = {
     body: {type: GraphQLString},
   },
   async resolve(_, {id, title, body}, { verifiedUser }) {
-    console.log(verifiedUser)
-    console.log(id, title, body)
+
     if(!verifiedUser) throw new Error("Unauthorized")
+
     const updatedPost = await Post.findOneAndUpdate(
       {_id: id, authorId: verifiedUser._id}, //Condiciones de busqueda
-      {title, body}, // Elementos a modificar
+      { title, body, 
+        //createdAt: moment(new Date(0)).format('MMMM Do YYYY, h:mm:ss a'),
+        updatedAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')}, // Elementos a modificar
       {new: true} // Retorna nuevo registro modificado
     )
+
+    console.log(verifiedUser)
+    console.log(id, title, body)
     console.log(updatedPost)
+    
     return updatedPost
   }
 }
