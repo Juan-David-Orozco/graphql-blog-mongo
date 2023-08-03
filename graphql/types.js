@@ -10,7 +10,7 @@ const UserType = new GraphQLObjectType({
     email: {type: GraphQLString},
     displayName: {type: GraphQLString},
     createdAt: {type: GraphQLString},
-    updatedAt: {type: GraphQLString},
+    //updatedAt: {type: GraphQLString},
   },
 })
 
@@ -38,6 +38,8 @@ const CommentType = new GraphQLObjectType({
   fields: () => ({
     id: {type: GraphQLID},
     comment: {type: GraphQLString},
+    createdAt: {type: GraphQLString},
+    updatedAt: {type: GraphQLString},
     user : {type: UserType, resolve(parent) {
       return User.findById(parent.userId)
     }},

@@ -15,18 +15,16 @@ const register = {
   },
   async resolve(_, args) {
     const {username, password, email, displayName} = args
-    const user = new User({username, password, email, displayName})
+    const createdAt = moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')
+    const user = new User({username, password, email, displayName, createdAt})
     await user.save()
-    console.log(user)
-
     const token = createJWTToken({
       _id: user._id,
       username: user.username,
       email: user.email,
     })
+    console.log(user)
     console.log(token)
-
-    //return "User register successfully"
     return token
   }
 }
@@ -42,12 +40,13 @@ const login = {
     const {email, password} = args
     const user = await User.findOne({email: email}).select('+password')
     if(!user || password !== user.password) throw new Error("Invalid Credentials")
-    //console.log(user)
     const token = createJWTToken({
       _id: user._id,
       username: user.username,
       email: user.email,
     })
+    console.log(user)
+    console.log(token)
     return token
   }
 }
@@ -60,18 +59,16 @@ const createPost = {
     body: {type: GraphQLString},
   },
   async resolve(_, args, { verifiedUser }) {
-
     const post = new Post({
       title: args.title,
       body: args.body,
       authorId: verifiedUser._id,
-      createdAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')
+      createdAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a'),
+      updatedAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')
     })
     await post.save()
-    
     console.log(verifiedUser)
     console.log(post)
-
     return post
   }
 }
@@ -80,26 +77,20 @@ const updatePost = {
   type: PostType,
   description: "Updated a post",
   args: {
-    id: {type: GraphQLID},
+    postId: {type: GraphQLID},
     title: {type: GraphQLString},
     body: {type: GraphQLString},
   },
-  async resolve(_, {id, title, body}, { verifiedUser }) {
-
+  async resolve(_, {postId, title, body}, { verifiedUser }) {
     if(!verifiedUser) throw new Error("Unauthorized")
-
     const updatedPost = await Post.findOneAndUpdate(
-      {_id: id, authorId: verifiedUser._id}, //Condiciones de busqueda
-      { title, body, 
-        //createdAt: moment(new Date(0)).format('MMMM Do YYYY, h:mm:ss a'),
-        updatedAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')}, // Elementos a modificar
+      {_id: postId, authorId: verifiedUser._id}, //Condiciones de busqueda
+      { title, body, updatedAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')}, // Elementos a modificar
       {new: true} // Retorna nuevo registro modificado
     )
-
+    if(!updatedPost) throw new Error("Post not found")
     console.log(verifiedUser)
-    console.log(id, title, body)
     console.log(updatedPost)
-    
     return updatedPost
   }
 }
@@ -111,16 +102,13 @@ const deletePost = {
     postId: {type: GraphQLID},
   },
   async resolve(_, { postId }, { verifiedUser }) {
-    console.log(verifiedUser)
     if(!verifiedUser) throw new Error("Unauthorized")
-
     const deletedPost = await Post.findOneAndDelete({
       _id: postId, authorId: verifiedUser._id  //Condiciones de busqueda
     })
+    console.log(verifiedUser)
     console.log(deletedPost)
-
     if(!deletedPost) throw new Error("Post not found")
-
     return "Deleted a post successfully"
   }
 }
@@ -133,19 +121,17 @@ const addComment = {
     postId: {type: GraphQLID},
   },
   async resolve(_, {comment, postId}, { verifiedUser }) {
-    console.log(comment, postId)
-    console.log(verifiedUser)
     if(!verifiedUser) throw new Error("Unauthorized")
-
     const newComment = new Comment({
       comment: comment,
       postId: postId,
-      userId: verifiedUser._id
+      userId: verifiedUser._id,
+      createdAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a'),
+      updatedAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')
     })
-    console.log(newComment)
     const savedComment = await newComment.save()
+    console.log(verifiedUser)
     console.log(savedComment)
-
     return savedComment
   }
 }
@@ -154,22 +140,19 @@ const updateComment = {
   type: CommentType,
   description: "Update a comment",
   args: {
-    id: {type: GraphQLID},
+    commentId: {type: GraphQLID},
     comment: {type: GraphQLString},
   },
-  async resolve(_, {id, comment}, { verifiedUser }) {
-    console.log(verifiedUser)
-
+  async resolve(_, {commentId, comment}, { verifiedUser }) {
     if(!verifiedUser) throw new Error("Unauthorized")
-
     const updatedComment = await Comment.findOneAndUpdate(
-      {_id: id, userId: verifiedUser._id}, //Condiciones de busqueda
-      {comment}, // Elementos a modificar
+      {_id: commentId, userId: verifiedUser._id}, //Condiciones de busqueda
+      {comment, updatedAt: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')}, // Elementos a modificar
       {new: true} // Retorna nuevo registro modificado
-    ) 
+    )
+    console.log(verifiedUser)
     console.log(updatedComment)
     if(!updatedComment) throw new Error("Comment not found")
-
     return updatedComment
   }
 }
@@ -181,16 +164,13 @@ const deleteComment = {
     commentId: {type: GraphQLID}
   },
   async resolve(_, { commentId }, { verifiedUser }) {
-
     if(!verifiedUser) throw new Error("Unauthorized")
-
     const deletedComment = await Comment.findOneAndDelete(
       {_id: commentId, userId: verifiedUser._id}
     )
+    console.log(verifiedUser)
     console.log(deletedComment)
-
     if(!deletedComment) throw new Error("Comment not found")
-
     return "Comment deleted successfully"
   }
 }

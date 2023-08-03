@@ -23,10 +23,11 @@ const userSchema = new Schema(
     displayName: {
       type: String,
       required: true,
-    }
+    },
+    createdAt: String
   }, 
   { // Se añaden automaticamente al crear un documento en mongoDB
-    timestamps: true,
+    //timestamps: true,
     versionKey: false
   }
 )

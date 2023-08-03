@@ -1,5 +1,4 @@
 const { Schema, model } = require('mongoose')
-const moment = require('moment')
 
 const postSchema = new Schema(
   {
@@ -16,12 +15,10 @@ const postSchema = new Schema(
       required: true
     },
     createdAt: {
-      type: String,
-      default: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')
+      type: String
     },
     updatedAt: {
-      type: String,
-      default: moment(Date().now).format('MMMM Do YYYY, h:mm:ss a')
+      type: String
     }
   },
   {

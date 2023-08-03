@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose')
+const moment = require('moment')
 
 const commentSchema = new Schema(
   {
@@ -13,10 +14,17 @@ const commentSchema = new Schema(
     postId: {
       type: String,
       required: true
+    },
+    createdAt: {
+      type: String
+    },
+    updatedAt: {
+      type: String
     }
   },
   {
-    timestamps: true
+    //timestamps: true,
+    versionKey: false
   }
 )
 
